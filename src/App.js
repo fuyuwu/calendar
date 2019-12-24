@@ -11,10 +11,28 @@ class App extends Component {
     return this.child.current.switch();
   };
   nextMonth = () => {
-    return this.child.current.goNext();
+    return this.child.current.nextMonth();
   };
   prevMonth = () => {
-    return this.child.current.goPrev();
+    return this.child.current.prevMonth();
+  };
+  inputData = data => {
+    let calendarData = this.child.current.state.data;
+    this.child.current.setState({
+      data: [...data, ...calendarData]
+    });
+  };
+
+  resetData = data => {
+    this.child.current.setState({
+      data: [...data]
+    });
+  };
+
+  destory = () => {
+    this.child.current.setState({
+      data: []
+    });
   };
 
   render() {

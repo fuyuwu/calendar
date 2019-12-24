@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./style.scss";
-import moment, { now } from "moment";
+import moment from "moment";
 
 class Calendar extends Component {
   state = {
@@ -11,8 +11,6 @@ class Calendar extends Component {
     nowYM: 1, //當前年月
     dateData: [], //存放表頭年月陣列
     monthListArr: [],
-    $btn: "",
-    $date: "",
     active: 0 //加上active的class
   };
   weekList = [
@@ -24,8 +22,17 @@ class Calendar extends Component {
     "星期五",
     "星期六"
   ];
+  data = [];
   //render後執行
   componentDidMount() {
+    if (typeof this.props.dataSource === "object") {
+      const result = this.props.dataSource;
+      this.dataSource = result;
+      this.dataHandler(result);
+      this.setState({
+        data: result
+      });
+    }
     if (typeof this.props.dataSource === "string") {
       // console.log("dataSource的型別:", typeof this.props.dataSource);
       fetch(this.props.dataSource, {
@@ -48,9 +55,12 @@ class Calendar extends Component {
     }
   }
 
-  reg = () => {
-    let pattern = new RegExp("/^d{4}-d{2}-d{2}$/");
-  };
+  // resetData(resetData) {
+  //   console.log("resetData", resetData);
+  //   this.setState({
+  //     data: resetData
+  //   });
+  // }
 
   //從json取出資料並sort排序
   dataHandler = data => {
@@ -158,28 +168,29 @@ class Calendar extends Component {
 
   //上個月
   prevMonth = () => {
-    console.log("-1-1-1-1-1");
     let { data, initYearMonth } = this.state;
     this.data = []; //onClickPrev的data
     data.map(item => {
       if (
         item["date"].substring(0, 7) ===
-        moment(initYearMonth)
+        moment(initYearMonth, "YYYYMM")
           .add(-1, "M")
-          .format("YYYY/MM/DD")
+          .format("YYYY/MM")
       ) {
         return this.data.push(item);
       }
       return false;
     });
-    console.log("prevData", this.data);
+
+    console.log("prevMonth", this.data);
   };
   goPrev = e => {
-    console.log("pppppppppppppp");
-    let $btn = e.target;
+    if (e) {
+      let $btn = e.target;
+      this.props.onClickNext($btn, this.data, this);
+    }
     let { nowYM, monthListArr, initYearMonth } = this.state;
     this.prevMonth();
-    this.props.onClickPrev($btn, this.data, this);
     if (nowYM === 0) {
       nowYM = 0;
     } else {
@@ -189,8 +200,7 @@ class Calendar extends Component {
     this.setState(
       {
         initYearMonth,
-        nowYM,
-        $btn
+        nowYM
       },
       () => {
         this.slideYM();
@@ -200,29 +210,29 @@ class Calendar extends Component {
 
   //下個月
   nextMonth = () => {
-    console.log("+1+1+1+1+1");
     let { data, initYearMonth } = this.state;
     this.data = []; //onClickNext的data
     data.map(item => {
       if (
         item["date"].substring(0, 7) ===
-        moment(initYearMonth)
+        moment(initYearMonth, "YYYYMM")
           .add(+1, "M")
-          .format("YYYY/MM/DD")
+          .format("YYYY/MM")
       ) {
         return this.data.push(item);
       }
-      // console.log("nextData:", this.data);
       return false;
     });
+    console.log("nextMonth", this.data);
   };
 
   goNext = e => {
-    console.log("nnnnnnnnnnnnnn");
     let { nowYM, monthListArr, initYearMonth } = this.state;
-    let $btn = e.target;
     this.nextMonth();
-    this.props.onClickNext($btn, this.data, this);
+    if (e) {
+      let $btn = e.target;
+      this.props.onClickNext($btn, this.data, this);
+    }
     if (nowYM >= monthListArr.length - 1) {
       nowYM = monthListArr.length - 1;
     } else {
@@ -232,8 +242,7 @@ class Calendar extends Component {
     this.setState(
       {
         initYearMonth,
-        nowYM,
-        $btn
+        nowYM
       },
       () => {
         this.slideYM();
@@ -294,8 +303,9 @@ class Calendar extends Component {
             <a href="#" className="prev on" onClick={this.goPrev}></a>
             <ul>
               {dateData.map((item, idx) => {
-                let year = item.substring(0, 4); //2018
-                let month = item.substring(4, 6); //10
+                let year = item.slice(0, 4); //2018
+                let month = item.slice(4, 7); //10
+                // console.log("item123", item);
                 return (
                   <li
                     key={idx}
@@ -319,9 +329,10 @@ class Calendar extends Component {
             <a href="#" className="next on" onClick={this.goNext}></a>
           </div>
           <div className={!!changeWrap ? "weekWrap" : "weekWrap listWrap"}>
-            {this.weekShow().map((item, idx) => {
-              return <div key={idx}>{item}</div>;
-            })}
+            {!!changeWrap &&
+              this.weekShow().map((item, idx) => {
+                return <div key={idx}>{item}</div>;
+              })}
           </div>
           <div className={!!changeWrap ? "daysWrap " : "listWrap"}>
             {this.getMonthDays().map((date, idx) => {
