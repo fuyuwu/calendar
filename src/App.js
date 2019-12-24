@@ -11,15 +11,15 @@ class App extends Component {
     return this.child.current.switch();
   };
   nextMonth = () => {
-    return this.child.current.nextMonth();
+    return this.child.current.goNext();
   };
   prevMonth = () => {
-    return this.child.current.prevMonth();
+    return this.child.current.goPrev();
   };
   inputData = data => {
     let calendarData = this.child.current.state.data;
     this.child.current.setState({
-      data: [...data, ...calendarData]
+      data: [...calendarData, data]
     });
   };
 
@@ -39,17 +39,29 @@ class App extends Component {
     return (
       <Calender
         ref={this.child}
-        dataSource="./json/data1.json"
+        dataSource="./json/data2.json"
         initYearMonth="201810"
+        // dataKeySetting={{
+        //   // 保證出團 "guaranteed","certain"另一支檔案
+        //   guaranteed: "guaranteed",
+        //   // 狀態 "status", "state"
+        //   status: "status",
+        //   // 可賣團位 "availableVancancy", "onsell"
+        //   available: "availableVancancy",
+        //   // 團位 "totalVacnacy","total"
+        //   total: "totalVacnacy",
+        //   // 價格
+        //   price: "price"
+        // }}
         dataKeySetting={{
           // 保證出團 "guaranteed","certain"另一支檔案
-          guaranteed: "guaranteed",
+          guaranteed: "certain",
           // 狀態 "status", "state"
-          status: "status",
+          status: "state",
           // 可賣團位 "availableVancancy", "onsell"
-          available: "availableVancancy",
+          available: "onsell",
           // 團位 "totalVacnacy","total"
-          total: "totalVacnacy",
+          total: "total",
           // 價格
           price: "price"
         }}

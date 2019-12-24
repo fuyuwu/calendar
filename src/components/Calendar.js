@@ -22,7 +22,7 @@ class Calendar extends Component {
     "星期五",
     "星期六"
   ];
-  data = [];
+
   //render後執行
   componentDidMount() {
     if (typeof this.props.dataSource === "object") {
@@ -54,13 +54,6 @@ class Calendar extends Component {
         .catch(e => console.log("錯誤:", e));
     }
   }
-
-  // resetData(resetData) {
-  //   console.log("resetData", resetData);
-  //   this.setState({
-  //     data: resetData
-  //   });
-  // }
 
   //從json取出資料並sort排序
   dataHandler = data => {
@@ -121,10 +114,10 @@ class Calendar extends Component {
     }
 
     let reg = /\//g;
-    let str = initYearMonth.replace(reg, "");
+    let str = initYearMonth.replace(reg, "$1,$2,01");
     let weekDate = new Date(str).getDay(); //取得星期(0-6)
     // console.log("startDate", startDate); //1
-
+    // console.log("str", str);
     for (let i = 0; i < weekDate; i++) {
       dateArr.unshift(-1);
       // console.log("dateArr", dateArr); //[-1,1,2,3]
@@ -182,7 +175,7 @@ class Calendar extends Component {
       return false;
     });
 
-    console.log("prevMonth", this.data);
+    // console.log("prevMonth", this.data);
   };
   goPrev = e => {
     if (e) {
@@ -223,7 +216,7 @@ class Calendar extends Component {
       }
       return false;
     });
-    console.log("nextMonth", this.data);
+    // console.log("nextMonth", this.data);
   };
 
   goNext = e => {
@@ -274,14 +267,23 @@ class Calendar extends Component {
 
   //click表頭顯示相對應的資料
   getNowMonth = selectedMonth => {
-    this.nextMonth();
-    this.prevMonth();
-    console.log("selectedMonth", selectedMonth);
-    this.setState({
-      initYearMonth: selectedMonth
-    });
+    let { nowYM, monthListArr } = this.state;
+    if (nowYM < monthListArr.length - 1) {
+      nowYM += 1;
+    } else if (nowYM !== 0) {
+      nowYM -= 1;
+    }
+    console.log("nowYM", nowYM, "selectedMonth", selectedMonth);
+    this.setState(
+      {
+        initYearMonth: selectedMonth,
+        nowYM
+      },
+      () => {
+        this.slideYM();
+      }
+    );
   };
-
   // 切換顯示
   switch = () => {
     this.setState({
@@ -303,9 +305,6 @@ class Calendar extends Component {
             <a href="#" className="prev on" onClick={this.goPrev}></a>
             <ul>
               {dateData.map((item, idx) => {
-                let year = item.slice(0, 4); //2018
-                let month = item.slice(4, 7); //10
-                // console.log("item123", item);
                 return (
                   <li
                     key={idx}
@@ -315,7 +314,7 @@ class Calendar extends Component {
                     <span
                       className={item === initYearMonth ? "currentMonth" : " "}
                     >
-                      {year + " " + month}月
+                      {moment(item, "YYYYMM").format("YYYY MM[月]")}
                     </span>
                     {dateData.indexOf(initYearMonth) === initYearMonth ? (
                       <span className="no-data">無出發日</span>
@@ -336,6 +335,7 @@ class Calendar extends Component {
           </div>
           <div className={!!changeWrap ? "daysWrap " : "listWrap"}>
             {this.getMonthDays().map((date, idx) => {
+              let weekend = "";
               const initYearMonth = this.state.initYearMonth;
               let newDate = date < 10 && date > 0 ? "0" + date : date;
               let row = this.state.data.find((value, idx) => {
@@ -346,11 +346,15 @@ class Calendar extends Component {
                       "YYYY/MM/DD"
                     )
                   );
-                // console.log("newDate", newDate);
               });
               // 是列表 && 有資料 || 是日曆, 回傳其data
               if ((!changeWrap && !!row) || changeWrap) {
                 let { active } = this.state;
+                if (!changeWrap && !!row) {
+                  let weekDate = new Date(row["date"]).getDay();
+                  console.log("weekDate", weekDate);
+                  weekend = this.weekList[weekDate];
+                }
                 return (
                   <div
                     id={date}
@@ -366,7 +370,8 @@ class Calendar extends Component {
                     }
                     onClick={e => this.clickDays(e)}
                   >
-                    <span className="num">{date > 0 ? date : ""}</span>
+                    <span className="num">{date >= 0 ? date : ""}</span>
+                    <span className="weekday">{weekend}</span>
                     {date > 0 && !!row ? (
                       <HasDate
                         date={date}
@@ -389,31 +394,34 @@ class Calendar extends Component {
 export default Calendar;
 
 //component
-function HasDate({ row }) {
+function HasDate({ row, dataKeySetting }) {
+  const status = dataKeySetting.status;
+  const available = dataKeySetting.available;
+  const guaranteed = dataKeySetting.guaranteed;
+  const total = dataKeySetting.total;
+  const price = dataKeySetting.price;
   const statusGreen =
-    row.status === "報名" || row.status === "後補" || row.status === "預定"
+    row[status] === "報名" || row[status] === "後補" || row[status] === "預定"
       ? "statusGreen"
       : "";
   const statusOrange =
-    row.status === "截止" || row.status === "額滿" || row.status === "關團"
+    row[status] === "截止" || row[status] === "額滿" || row[status] === "關團"
       ? "statusOrange"
       : "";
 
-  // console.log("guaranteed", row);
   return (
     <>
-      <span className="weekday">星期四</span>
       <span
         className={
-          !!row.status ? `status ${statusGreen}${statusOrange}` : "status"
+          !!row[status] ? `status ${statusGreen}${statusOrange}` : "status"
         }
       >
-        {row.status}
+        {row[status]}
       </span>
-      <span className="sell">可賣：{row.availableVancancy}</span>
-      <span className="group">團位：{row.totalVacnacy}</span>
-      {row.guaranteed && <span className="tip">{"成團"}</span>}
-      <span className="price">{"$" + row.price.toLocaleString()}</span>
+      <span className="sell">可賣：{row[available]}</span>
+      <span className="group">團位：{row[total]}</span>
+      {row[guaranteed] && <span className="tip">成團</span>}
+      <span className="price">{"$" + row[price].toLocaleString()}</span>
     </>
   );
 }
