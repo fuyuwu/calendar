@@ -1,0 +1,335 @@
+$bg-color: #ede9dd;
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: Verdana, Arial, "\5FAE\8EDF\6B63\9ED1\9AD4", "Microsoft JhengHei",
+    "\5FAE\8EDF\96C5\9ED1\9AD4", "Microsoft YaHei";
+  font-size: 14px;
+  line-height: 1.5;
+}
+a {
+  text-decoration: none;
+}
+li {
+  list-style: none;
+}
+.d-flex {
+  display: flex;
+}
+.d-none {
+  display: none;
+}
+.App {
+  max-width: 700px;
+  .switch {
+    color: #0077b3;
+    font-size: 16px;
+    width: 100%;
+    height: 24px;
+    cursor: pointer;
+    text-align: right;
+    .fas {
+      color: #0077b3;
+    }
+  }
+
+  // ====整個日曆===============================
+  .calendars {
+    // =============tab============//
+    .tabWrap {
+      position: relative;
+      background-color: $bg-color;
+      .prev {
+        position: relative;
+        display: inline-block;
+        width: 20px;
+        height: 30px;
+        &:after {
+          content: "";
+          display: inline-block;
+          width: 0;
+          height: 0;
+          border-style: solid;
+          border-width: 10px 10px 10px 0;
+          border-color: transparent #e10500 transparent transparent;
+        }
+      }
+      .next {
+        position: relative;
+        display: inline-block;
+        width: 20px;
+        height: 30px;
+        &:after {
+          content: "";
+          display: inline-block;
+          width: 0;
+          height: 0;
+          border-width: 10px 0 10px 10px;
+          border-style: solid;
+          border-color: transparent transparent transparent #e10500;
+        }
+      }
+      ul {
+        width: calc(100% - 40px);
+        display: inline-block;
+        li {
+          width: calc(100% / 3);
+          height: 50px;
+          line-height: 50px;
+          display: inline-block;
+          border-top: 3px solid #ede9dd;
+          background-color: $bg-color;
+          position: relative;
+          cursor: pointer;
+          .no-data {
+            display: inline-block;
+            text-align: center;
+            color: #24a07c;
+            position: absolute;
+            left: 0;
+            top: 15px;
+          }
+          span {
+            display: inline-block;
+            width: 100%;
+          }
+        }
+        .currentMonth {
+          width: 100%;
+          background: #fff;
+          color: #e10500;
+        }
+      }
+    }
+    //============Week==================================================
+    .weekWrap {
+      width: 100%;
+      border: solid #ccc;
+      border-width: 0px 1px 1px 1px;
+      div {
+        width: calc(100% / 7);
+        display: inline-block;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        color: #666;
+        font-weight: 900;
+        border-top: 1px solid #f4f4f4;
+        border-bottom: 1px solid #f4f4f4;
+      }
+      .listWrap {
+        display: none;
+      }
+    }
+    //============日期(被切換)=================================================
+    .daysWrap {
+      border: solid #ccc;
+      border-width: 0 0 0 1px;
+      .days {
+        width: calc(100% / 7);
+        display: inline-block;
+        height: 100px;
+        font-size: 12px;
+        padding-left: 3px;
+        border: solid #ccc;
+        border-width: 0 1px 1px 0;
+        position: relative;
+        vertical-align: middle;
+        cursor: pointer;
+
+        &:hover {
+          background-color: #fff9e3;
+        }
+
+        .num,
+        .sell,
+        .group,
+        .price,
+        .status {
+          display: inline-block;
+          width: 100%;
+          text-align: left;
+          color: #666;
+        }
+        .price {
+          color: #e10500;
+        }
+        .weekday {
+          display: none;
+        }
+        .tip {
+          position: absolute;
+          top: 0;
+          right: -1px;
+          padding: 0 3px;
+          width: 40px;
+          height: 20px;
+          color: #fff;
+          text-align: center;
+          line-height: 20px;
+          background: #ff7800;
+        }
+        .statusGray {
+          color: #999;
+        }
+
+        .statusGreen {
+          color: #24a07c;
+        }
+        .statusOrange {
+          color: #ff7800;
+        }
+      }
+      .active {
+        border: 1px solid #66bb3c;
+        background-color: #fff9e3;
+      }
+      .disabled {
+        background: #f8f8f8;
+        cursor: default;
+      }
+      li {
+        .no-data {
+          display: inline-block;
+          text-align: center;
+          color: #24a07c;
+        }
+      }
+      .pages {
+        display: none;
+      }
+      .test {
+        display: none;
+      }
+    }
+  }
+  // ====切換的日曆==================================================
+  .listWrap {
+    .days {
+      width: 100%;
+      height: 65px;
+      padding: 0 5px;
+      position: relative;
+      border: solid #ccc;
+      border-width: 0 1px 1px 1px;
+      &:hover {
+        background-color: #fff9e3;
+        cursor: pointer;
+      }
+      &.active {
+        border: 1px solid #66bb3c;
+        background-color: #fff9e3;
+      }
+      .num {
+        position: absolute;
+        left: 33px;
+        top: 3px;
+        pointer-events: none;
+        color: #444;
+        font-size: 20px;
+      }
+      .status {
+        position: absolute;
+        right: 15px;
+        top: 8px;
+        pointer-events: none;
+        color: #444;
+      }
+      .sell,
+      .group {
+        position: relative;
+        top: 8px;
+        left: -178px;
+        pointer-events: none;
+        color: #444;
+        margin-right: 30px;
+        pointer-events: none;
+      }
+      .price {
+        position: absolute;
+        display: block;
+        right: 15px;
+        top: 35px;
+        color: #e10500;
+        font-size: 16px;
+        pointer-events: none;
+      }
+      .tip {
+        position: absolute;
+        top: 33px;
+        left: 90px;
+        display: block;
+        width: 40px;
+        height: 20px;
+        color: #fff;
+        text-align: center;
+        line-height: 20px;
+        background: #ff7800;
+        border-radius: 3px;
+        pointer-events: none;
+      }
+
+      .weekday {
+        display: block;
+        position: absolute;
+        bottom: 5px;
+        left: 10px;
+        font-size: 20px;
+        color: #444;
+        pointer-events: none;
+      }
+      .statusGray {
+        color: #999;
+      }
+
+      .statusGreen {
+        color: #24a07c;
+      }
+      .statusOrange {
+        color: #ff7800;
+      }
+    }
+    &.d-none {
+      display: none;
+    }
+  }
+  .currentMonth {
+    background: #fff;
+    color: #e10500;
+  }
+  .test {
+    position: absolute;
+  }
+  .pages {
+    width: 100%;
+    line-height: 30px;
+    height: 30px;
+    margin: 0 auto;
+    text-align: right;
+    vertical-align: middle;
+    position: relative;
+    > span {
+      text-align: center;
+      width: 100%;
+      display: inline-block;
+    }
+    a {
+      span:nth-child(1) {
+        cursor: pointer;
+        position: absolute;
+        left: 0;
+        &:before {
+          border-width: 7px 7px 7px 0;
+        }
+      }
+      span:nth-child(2) {
+        cursor: pointer;
+        position: absolute;
+        right: 0;
+      }
+    }
+  }
+}
