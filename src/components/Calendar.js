@@ -107,37 +107,39 @@ class Calendar extends Component {
     let year = dateTime.substring(0, 4); //2018
     let month = dateTime.substring(4, 6); //10
     let dateInMonth = new Date(year, month, 0).getDate(); //取得當月的天數
+    console.log("dateInMonth", month);
 
+    let str = `${year}/${month}`;
+    let weekDate = new Date(str).getDay(); //取得星期(0-6)
+
+    console.log("str", str);
     let dateArr = [];
-    for (let i = 1; i < dateInMonth; i++) {
+    // console.log("str", str);
+    for (let i = 0; i < weekDate; i++) {
+      dateArr.push(-1);
+      // console.log("dateArr", dateArr); //[-1,1,2,3]
+    }
+    for (let i = 1; i <= dateInMonth; i++) {
       dateArr.push(i);
     }
 
-    let reg = /\//g;
-    let str = initYearMonth.replace(reg, "$1,$2,01");
-    let weekDate = new Date(str).getDay(); //取得星期(0-6)
-    // console.log("startDate", startDate); //1
-    // console.log("str", str);
-    for (let i = 0; i < weekDate; i++) {
-      dateArr.unshift(-1);
-      // console.log("dateArr", dateArr); //[-1,1,2,3]
-    }
-    for (let i = 0; i <= 42 - dateInMonth - weekDate; i++) {
+    for (let i = 0; i < 42 - dateInMonth - weekDate; i++) {
       dateArr.push(-1);
       // console.log("dateArr", dateArr); //[30,-1,-1,-1]
     }
+    console.log("dateArr", dateArr);
     return dateArr;
   };
 
   // 整理initYearMonth
   slideYM = () => {
-    let { nowYM, monthListArr } = this.state;
+    let { nowYM, monthListArr, initYearMonth } = this.state;
     console.log("nowYM", nowYM);
     let showArr = [];
 
     //當月
     if (!monthListArr.length) return;
-    if (nowYM === 0) {
+    if (nowYM === 0 && initYearMonth !== monthListArr[1]) {
       showArr = [
         monthListArr[nowYM],
         monthListArr[nowYM + 1],
@@ -149,6 +151,14 @@ class Calendar extends Component {
         monthListArr[nowYM - 1],
         monthListArr[nowYM]
       ];
+    } else if (initYearMonth === monthListArr[monthListArr.length - 3]) {
+      showArr = [
+        monthListArr[monthListArr.length - 4],
+        monthListArr[monthListArr.length - 3],
+        monthListArr[monthListArr.length - 2]
+      ];
+    } else if (initYearMonth === monthListArr[1]) {
+      showArr = [monthListArr[0], monthListArr[1], monthListArr[2]];
     } else {
       showArr = [
         monthListArr[nowYM - 1],
@@ -268,18 +278,23 @@ class Calendar extends Component {
   //click表頭顯示相對應的資料
   getNowMonth = selectedMonth => {
     let { nowYM, monthListArr } = this.state;
-    if (nowYM < monthListArr.length - 1) {
-      nowYM += 1;
-    } else if (nowYM !== 0) {
+    if (selectedMonth < monthListArr[nowYM]) {
       nowYM -= 1;
+    } else if (selectedMonth > monthListArr[nowYM]) {
+      if (nowYM <= 0) {
+        nowYM += 2;
+      } else {
+        nowYM += 1;
+      }
     }
-    console.log("nowYM", nowYM, "selectedMonth", selectedMonth);
+
     this.setState(
       {
         initYearMonth: selectedMonth,
         nowYM
       },
       () => {
+        console.log("sldfkjsldfksjd", this.state);
         this.slideYM();
       }
     );
@@ -352,7 +367,12 @@ class Calendar extends Component {
                 let { active } = this.state;
                 if (!changeWrap && !!row) {
                   let weekDate = new Date(row["date"]).getDay();
-                  console.log("weekDate", weekDate);
+                  console.log(
+                    "weekDate",
+                    row["date"],
+                    new Date(row["date"]),
+                    weekDate
+                  );
                   weekend = this.weekList[weekDate];
                 }
                 return (
