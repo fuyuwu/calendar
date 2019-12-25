@@ -85,7 +85,7 @@ class Calendar extends Component {
         nowYM
       },
       () => {
-        this.slideYM();
+        this.slideYM(this.state.nowYM);
       }
     );
   };
@@ -107,34 +107,29 @@ class Calendar extends Component {
     let year = dateTime.substring(0, 4); //2018
     let month = dateTime.substring(4, 6); //10
     let dateInMonth = new Date(year, month, 0).getDate(); //取得當月的天數
-    console.log("dateInMonth", month);
+    // console.log("dateInMonth", month);
 
     let str = `${year}/${month}`;
     let weekDate = new Date(str).getDay(); //取得星期(0-6)
 
-    console.log("str", str);
     let dateArr = [];
-    // console.log("str", str);
     for (let i = 0; i < weekDate; i++) {
       dateArr.push(-1);
-      // console.log("dateArr", dateArr); //[-1,1,2,3]
     }
     for (let i = 1; i <= dateInMonth; i++) {
       dateArr.push(i);
     }
-
     for (let i = 0; i < 42 - dateInMonth - weekDate; i++) {
       dateArr.push(-1);
-      // console.log("dateArr", dateArr); //[30,-1,-1,-1]
     }
-    console.log("dateArr", dateArr);
+
     return dateArr;
   };
 
   // 整理initYearMonth
-  slideYM = () => {
+  slideYM = nowYearMonth => {
     let { nowYM, monthListArr, initYearMonth } = this.state;
-    console.log("nowYM", nowYM);
+    console.log("nowYearMonth", nowYearMonth);
     let showArr = [];
 
     //當月
@@ -151,21 +146,22 @@ class Calendar extends Component {
         monthListArr[nowYM - 1],
         monthListArr[nowYM]
       ];
-    } else if (initYearMonth === monthListArr[monthListArr.length - 3]) {
+    } else if (initYearMonth === monthListArr[nowYearMonth]) {
       showArr = [
-        monthListArr[monthListArr.length - 4],
-        monthListArr[monthListArr.length - 3],
-        monthListArr[monthListArr.length - 2]
+        monthListArr[nowYearMonth - 1],
+        monthListArr[nowYearMonth],
+        monthListArr[nowYearMonth + 1]
       ];
     } else if (initYearMonth === monthListArr[1]) {
       showArr = [monthListArr[0], monthListArr[1], monthListArr[2]];
-    } else {
+    } else if (nowYearMonth === monthListArr.length - 2) {
       showArr = [
-        monthListArr[nowYM - 1],
-        monthListArr[nowYM],
-        monthListArr[nowYM + 1]
+        monthListArr[nowYearMonth - 2],
+        monthListArr[nowYearMonth - 1],
+        monthListArr[nowYearMonth]
       ];
     }
+
     this.setState({ dateData: showArr });
   };
 
@@ -184,8 +180,6 @@ class Calendar extends Component {
       }
       return false;
     });
-
-    // console.log("prevMonth", this.data);
   };
   goPrev = e => {
     if (e) {
@@ -206,7 +200,7 @@ class Calendar extends Component {
         nowYM
       },
       () => {
-        this.slideYM();
+        this.slideYM(this.state.nowYM);
       }
     );
   };
@@ -226,7 +220,6 @@ class Calendar extends Component {
       }
       return false;
     });
-    // console.log("nextMonth", this.data);
   };
 
   goNext = e => {
@@ -248,7 +241,7 @@ class Calendar extends Component {
         nowYM
       },
       () => {
-        this.slideYM();
+        this.slideYM(this.state.nowYM);
       }
     );
   };
@@ -279,9 +272,19 @@ class Calendar extends Component {
   getNowMonth = selectedMonth => {
     let { nowYM, monthListArr } = this.state;
     if (selectedMonth < monthListArr[nowYM]) {
-      nowYM -= 1;
+      if (
+        //只有最後月會有需要減2的判斷,其他-1
+        selectedMonth === monthListArr[monthListArr.length - 3] && //點選的月份和所有月分中倒數第三個月份相同
+        nowYM === monthListArr.length - 1 //目前被選的月份是所有月分中的最後一個
+      ) {
+        nowYM -= 2;
+      } else {
+        nowYM -= 1;
+      }
     } else if (selectedMonth > monthListArr[nowYM]) {
-      if (nowYM <= 0) {
+      if (selectedMonth === monthListArr[2] && nowYM === 0) {
+        //只有第一個月會有需要加2的判斷,其他都+1
+        //點選的月份和所有月分中第三個月份相同 && 目前被選的月份是所有月分中的第一個
         nowYM += 2;
       } else {
         nowYM += 1;
@@ -294,8 +297,8 @@ class Calendar extends Component {
         nowYM
       },
       () => {
-        console.log("sldfkjsldfksjd", this.state);
-        this.slideYM();
+        //在slideYM的function中傳入nowYearMonth,之後呼叫此function需傳入並得到已更新的值
+        this.slideYM(this.state.nowYM);
       }
     );
   };
