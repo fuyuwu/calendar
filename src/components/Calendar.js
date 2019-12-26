@@ -11,7 +11,8 @@ class Calendar extends Component {
     nowYM: 1, //當前年月
     dateData: [], //存放表頭年月陣列
     monthListArr: [],
-    active: 0 //加上active的class
+    active: 0, //加上active的class
+    dayData: []
   };
   weekList = [
     "星期日",
@@ -131,7 +132,6 @@ class Calendar extends Component {
     let { nowYM, monthListArr, initYearMonth } = this.state;
     console.log("nowYearMonth", nowYearMonth);
     let showArr = [];
-
     //當月
     if (!monthListArr.length) return;
     if (nowYM === 0 && initYearMonth !== monthListArr[1]) {
@@ -161,7 +161,6 @@ class Calendar extends Component {
         monthListArr[nowYearMonth]
       ];
     }
-
     this.setState({ dateData: showArr });
   };
 
@@ -247,25 +246,35 @@ class Calendar extends Component {
   };
 
   clickDays = e => {
-    let { data, initYearMonth } = this.state;
-    let $date = e.currentTarget;
-    let date = e.currentTarget.id;
-    console.log("idDate", typeof date);
-    this.props.onClickDate($date, this.data);
-    this.data = []; //onClickDate
-    data.map((item, idx) => {
+    let { data, initYearMonth, dayData } = this.state;
+    let day = e.currentTarget.id;
+    let ym = moment(initYearMonth, "YYYYMM").format("YYYYMM");
+    if (e) {
+      let $date = e.currentTarget;
+      this.props.onClickDate($date, dayData);
+    }
+    dayData = []; //onClickDate
+    data.map(item => {
       if (
         item["date"] ===
-        moment(`${initYearMonth}${idx}`, "YYYYMM").format("YYYY/MM/DD")
+        moment(`${initYearMonth}${day}`, "YYYYMMDD").format("YYYY/MM/DD")
       ) {
-        return this.data.push(item);
+        console.log("initYearMonth", initYearMonth, "day:", day);
+        return dayData.push(item);
       }
       return false;
     });
-    console.log("this.dateee", date);
-    this.setState({
-      active: date
-    });
+
+    this.setState(
+      {
+        active: `${ym}${day}`
+      },
+      () => {
+        this.slideYM(this.state.nowYM);
+      }
+    );
+
+    console.log("dayData", dayData);
   };
 
   //click表頭顯示相對應的資料
@@ -356,7 +365,7 @@ class Calendar extends Component {
               let weekend = "";
               const initYearMonth = this.state.initYearMonth;
               let newDate = date < 10 && date > 0 ? "0" + date : date;
-              let row = this.state.data.find((value, idx) => {
+              let row = this.state.data.find(value => {
                 if (newDate > 0)
                   return (
                     value.date ===
@@ -367,24 +376,19 @@ class Calendar extends Component {
               });
               // 是列表 && 有資料 || 是日曆, 回傳其data
               if ((!changeWrap && !!row) || changeWrap) {
-                let { active } = this.state;
+                let { active, nowYM, monthListArr } = this.state;
                 if (!changeWrap && !!row) {
                   let weekDate = new Date(row["date"]).getDay();
-                  console.log(
-                    "weekDate",
-                    row["date"],
-                    new Date(row["date"]),
-                    weekDate
-                  );
                   weekend = this.weekList[weekDate];
                 }
+
                 return (
                   <div
                     id={date}
                     key={"days" + idx}
                     className={
                       !!row
-                        ? String(date) === active
+                        ? `${monthListArr[nowYM]}${date}` === active
                           ? "days active"
                           : "days"
                         : date > 0
